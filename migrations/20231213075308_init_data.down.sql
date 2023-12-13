@@ -1,0 +1,4 @@
+-- Add down migration script here
+
+TRUNCATE TABLE quote RESTART IDENTITY CASCADE;
+TRUNCATE TABLE author RESTART IDENTITY CASCADE;
