@@ -5,9 +5,11 @@ mod crud {
     pub mod author;
     pub mod quote;
 }
-use crud::author::{read_author, read_authors, create_author, read_random_author, delete_author};
-use crud::quote::{create_quote, read_quote, read_quote_with_author, read_quotes, read_quotes_with_author, update_quote, read_random_quote, read_random_quote_with_author, delete_quote};
-
+use crud::author::{create_author, delete_author, read_author, read_authors, read_random_author};
+use crud::quote::{
+    create_quote, delete_quote, read_quote, read_quote_with_author, read_quotes,
+    read_quotes_with_author, read_random_quote, read_random_quote_with_author, update_quote,
+};
 
 mod models {
     pub mod author;
@@ -16,11 +18,10 @@ mod models {
 use models::author::{Author, AuthorCreate, AuthorUpdate};
 use models::quote::{Quote, QuoteCreate, QuoteUpdate, QuoteWithAuthor};
 
-
 mod routs {
     pub mod router;
 }
-use routs::router::{get_author, config};
+use routs::router::{config, get_author};
 
 use dotenv::dotenv;
 use std::env;
@@ -31,14 +32,12 @@ pub struct AppState {
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 
-
 // #[tokio::main]
 // async fn main() -> Result<(), Box<dyn Error>> {
 //     dotenv().ok();
 //     let db_url = "DATABASE_URL";
 //     let url = env::var(db_url).expect(&format!("Expected {} to be set", db_url));
 //     let pool = sqlx::postgres::PgPool::connect(url.as_str()).await?;
-
 
 //     println!("Try to read author 1");
 //     let a = read_author(1, &pool).await?;
@@ -110,7 +109,6 @@ use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 //     Ok(())
 // }
 
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
@@ -127,9 +125,7 @@ async fn main() -> std::io::Result<()> {
     // let pool = sqlx::postgres::PgPool::connect(url.as_str()).await;
     let pool = sqlx::postgres::PgPool::connect(url.as_str());
 
-    let pool = match sqlx::postgres::PgPool::connect(url.as_str())
-        .await
-    {
+    let pool = match sqlx::postgres::PgPool::connect(url.as_str()).await {
         Ok(pool) => {
             println!("Connection to the database is successful!");
             pool
@@ -145,7 +141,7 @@ async fn main() -> std::io::Result<()> {
             // .app_data(web::Data::new(pool.clone()))
             .app_data(web::Data::new(AppState { db: pool.clone() }))
             .configure(config)
-            // .route("/author/{id}", web::get().to(get_author))
+        // .route("/author/{id}", web::get().to(get_author))
     })
     .bind((host, port))?
     .run()

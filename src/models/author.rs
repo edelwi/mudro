@@ -5,13 +5,13 @@ pub struct AuthorCreate {
 }
 
 pub struct AuthorUpdate {
-    pub author_name: String
+    pub author_name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Author {
     pub id: i32,
-    pub author_name: String
+    pub author_name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
