@@ -5,6 +5,7 @@ CREATE TABLE author (
     CONSTRAINT auth_name_unq UNIQUE(author_name)
 );
 
+
 CREATE TABLE quote (
     id SERIAL PRIMARY KEY,
     text varchar NOT NULL,

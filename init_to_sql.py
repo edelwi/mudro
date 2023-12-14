@@ -29,7 +29,7 @@ with open('init_quotes_raw.txt', 'r') as f:
         q_id = quotes.setdefault(quote, quote_id)
         if q_id == quote_id:
             # q = f"INSERT INTO quote (id, text, author_id) VALUES ({q_id}, $$'{quote}'$$, {a_id});"
-            q = f"INSERT INTO quote (text, author_id) VALUES ($$'{quote}'$$, {a_id});"
+            q = f"INSERT INTO quote (text, author_id) VALUES ($${quote}$$, {a_id});"
 
             ins_quotes.append(q)
             # print(q)
