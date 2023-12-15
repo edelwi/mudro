@@ -1,27 +1,33 @@
 use std::error::Error;
 extern crate dotenv;
+use actix_web::middleware::Logger;
 
 mod crud {
     pub mod author;
     pub mod quote;
 }
-use crud::author::{create_author, delete_author, read_author, read_authors, read_random_author};
-use crud::quote::{
-    create_quote, delete_quote, read_quote, read_quote_with_author, read_quotes,
-    read_quotes_with_author, read_random_quote, read_random_quote_with_author, update_quote,
-};
+// use crud::author::{create_author, delete_author, read_author, read_authors, read_random_author};
+// use crud::quote::{
+//     create_quote, delete_quote, read_quote, read_quote_with_author, read_quotes,
+//     read_quotes_with_author, read_random_quote, read_random_quote_with_author, update_quote,
+// };
 
 mod models {
     pub mod author;
+    pub mod parameter;
     pub mod quote;
 }
-use models::author::{Author, AuthorCreate, AuthorUpdate};
-use models::quote::{Quote, QuoteCreate, QuoteUpdate, QuoteWithAuthor};
+// use models::author::{Author, AuthorCreate, AuthorUpdate};
+// use models::quote::{Quote, QuoteCreate, QuoteUpdate, QuoteWithAuthor};
 
 mod routs {
-    pub mod router;
+    pub mod authors;
+    pub mod quotes;
+    pub mod main;
 }
-use routs::router::{config, get_author};
+// use routs::authors::aconfig;
+// use routs::quotes::qconfig;
+use routs::main::config;
 
 use dotenv::dotenv;
 use std::env;
@@ -138,10 +144,9 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            // .app_data(web::Data::new(pool.clone()))
             .app_data(web::Data::new(AppState { db: pool.clone() }))
             .configure(config)
-        // .route("/author/{id}", web::get().to(get_author))
+            .wrap(Logger::default())
     })
     .bind((host, port))?
     .run()

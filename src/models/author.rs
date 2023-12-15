@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AuthorCreate {
     pub author_name: String,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AuthorUpdate {
     pub author_name: String,
 }

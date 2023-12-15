@@ -110,3 +110,24 @@ pub async fn delete_author(id: i32, pool: &sqlx::PgPool) -> Result<Author, Box<d
 
     Ok(record)
 }
+
+// pub async fn total_authors(pool: &sqlx::PgPool) -> Result<i32, Box<dyn Error>> {
+//     let query = format!(r#"SELECT COUNT(*) FROM author"#);
+
+//     let row = sqlx::query(&query).fetch_one(pool).await?;
+
+//     let authors = row.try_get("count")?;
+
+//     Ok(authors)
+// }
+
+// async fn total_authors(pool: &sqlx::PgPool) -> Result<i32, Box<dyn Error>> {
+//     let mut conn = pool.acquire().await?;
+
+//     let authors: i64 = sqlx::query("SELECT COUNT(*) FROM authors")
+//         .fetch_one(&mut conn)
+//         .try_map(|row: PgRow| row.try_get("count"))
+//         .await?;
+
+//     Ok(authors)
+// }
