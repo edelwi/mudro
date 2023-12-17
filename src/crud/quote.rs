@@ -1,5 +1,5 @@
 use crate::models;
-use sqlx::{pool, Row};
+use sqlx::Row;
 use std::error::Error;
 
 use models::quote::{Quote, QuoteCreate, QuoteUpdate, QuoteWithAuthor};

@@ -4,31 +4,36 @@ use crate::crud::author::{
 use crate::models::author::{Author, AuthorCreate, AuthorResponse, AuthorUpdate};
 use crate::models::parameter::LimitOffset;
 use crate::AppState;
-use actix_web::error::HttpError;
-use actix_web::{delete, get, patch, post, web, App, HttpResponse, HttpServer, Responder};
-use std::error::Error;
+use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
+use serde_json;
+
+fn make_author_response(author: &Author) -> serde_json::Value {
+    let author_response = serde_json::json!(
+    {
+        "status": "success",
+        "data": serde_json::json!({
+            "author": author_to_response(&author)
+        }
+        )});
+    return author_response;
+}
 
 #[post("/authors")]
 pub async fn new_author(
     data: web::Data<AppState>,
     body: web::Json<AuthorCreate>,
 ) -> impl Responder {
-    println!("POST /authors {:?}", &body);
-
     let new_author = create_author(&body, &data.db).await;
     match new_author {
         Ok(new_author) => {
-            let author_response = serde_json::json!(
-            {
-                "status": "success",
-                "data": serde_json::json!({
-                    "author": author_to_response(&new_author)
-                }
-                )});
+            let author_response = make_author_response(&new_author);
 
             return HttpResponse::Ok().json(author_response);
         }
         Err(error) => {
+            // match error.kind() {
+
+            // }
             // if e.contains("Duplicate entry") {
             //     return HttpResponse::BadRequest().json(
             //     serde_json::json!({"status": "fail", "message": "Author already exists"}),
@@ -57,19 +62,10 @@ pub async fn upd_author(
         }
     };
 
-    println!("PUT /authors/{} {:?}", author_id, &body);
-
     let updated_author = update_author(&body, author_id, &data.db).await;
     match updated_author {
         Ok(updated_author) => {
-            let author_response = serde_json::json!(
-            {
-                "status": "success",
-                "data": serde_json::json!({
-                    "author": author_to_response(&updated_author)
-                }
-                )});
-
+            let author_response = make_author_response(&updated_author);
             return HttpResponse::Ok().json(author_response);
         }
         Err(error) => {
@@ -87,19 +83,11 @@ pub async fn upd_author(
 
 #[get("/authors/random")]
 pub async fn get_random_author(data: web::Data<AppState>) -> impl Responder {
-    println!("GET /authors/random");
-
     let result = read_random_author(&data.db).await;
 
     match result {
         Ok(author) => {
-            let author_response = serde_json::json!(
-            {
-                "status": "success",
-                "data": serde_json::json!({
-                    "author": author_to_response(&author)
-                }
-                )});
+            let author_response = make_author_response(&author);
 
             return HttpResponse::Ok().json(author_response);
         }
@@ -126,19 +114,12 @@ pub async fn get_author(data: web::Data<AppState>, id: web::Path<(String,)>) -> 
                 .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
         }
     };
-    println!("GET /authors/{}", author_id);
 
     let result = read_author(author_id, &data.db).await;
 
     match result {
         Ok(author) => {
-            let author_response = serde_json::json!(
-            {
-                "status": "success",
-                "data": serde_json::json!({
-                    "author": author_to_response(&author)
-                }
-                )});
+            let author_response = make_author_response(&author);
 
             return HttpResponse::Ok().json(author_response);
         }
@@ -165,19 +146,12 @@ pub async fn del_author(data: web::Data<AppState>, id: web::Path<(String,)>) -> 
                 .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
         }
     };
-    println!("DELETE /authors/{}", author_id);
 
     let result = delete_author(author_id, &data.db).await;
 
     match result {
         Ok(author) => {
-            let author_response = serde_json::json!(
-            {
-                "status": "success",
-                "data": serde_json::json!({
-                    "author": author_to_response(&author)
-                }
-                )});
+            let author_response = make_author_response(&author);
 
             return HttpResponse::Ok().json(author_response);
         }
@@ -198,7 +172,6 @@ pub async fn get_authors(
     data: web::Data<AppState>,
     params: web::Query<LimitOffset>,
 ) -> impl Responder {
-    println!("GET /authors {:?}", params);
     let limit = params.limit.unwrap_or(100) as i32;
     let offset = params.offset.unwrap_or(0) as i32;
 
@@ -249,5 +222,3 @@ fn author_to_response(author: &Author) -> AuthorResponse {
         author_name: author.author_name.to_owned(),
     }
 }
-
-
