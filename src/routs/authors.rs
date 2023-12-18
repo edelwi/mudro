@@ -222,3 +222,26 @@ fn author_to_response(author: &Author) -> AuthorResponse {
         author_name: author.author_name.to_owned(),
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_make_author_response() {
+        let author = Author {
+            id: 1,
+            author_name: String::from("John Doe"),
+        };
+
+        let author_response = make_author_response(&author);
+
+        assert_eq!(*author_response.get("status").unwrap(), "success");
+        let data = author_response.get("data").unwrap().get("author").unwrap();
+        // print!("{:?}", data);
+        assert_eq!(data.get("author_name").unwrap(), "John Doe");
+        assert_eq!(data.get("id").unwrap(), 1);
+    }
+
+}

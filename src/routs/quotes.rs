@@ -246,3 +246,47 @@ fn quote_short_to_response(quote: &Quote) -> QuoteResponse {
         author_id: quote.author_id.to_owned(),
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_make_quote_short_response() {
+        let quote = Quote {
+            id: 1,
+            text: String::from("Some wise thot."),
+            author_id: 5,
+        };
+
+        let quote_response = make_quote_short_response(&quote);
+
+        assert_eq!(*quote_response.get("status").unwrap(), "success");
+        let data = quote_response.get("data").unwrap().get("quote").unwrap();
+        // print!("{:?}", data);
+        assert_eq!(data.get("text").unwrap(), "Some wise thot.");
+        assert_eq!(data.get("id").unwrap(), 1);
+        assert_eq!(data.get("author_id").unwrap(), 5);
+    }
+
+    #[test]
+    fn test_make_quote_response() {
+        let quote = QuoteWithAuthor {
+            id: 1,
+            text: String::from("Some wise thot."),
+            author_id: 5,
+            author_name: String::from("John Doe"),
+        };
+
+        let quote_response = make_quote_response(&quote);
+
+        assert_eq!(*quote_response.get("status").unwrap(), "success");
+        let data = quote_response.get("data").unwrap().get("quote").unwrap();
+        // print!("{:?}", data);
+        assert_eq!(data.get("text").unwrap(), "Some wise thot.");
+        assert_eq!(data.get("id").unwrap(), 1);
+        assert_eq!(data.get("author_id").unwrap(), 5);
+        assert_eq!(data.get("author_name").unwrap(), "John Doe");
+    }
+}

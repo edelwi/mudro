@@ -3,6 +3,12 @@ use sqlx::Row;
 use std::error::Error;
 
 use models::author::{Author, AuthorCreate, AuthorUpdate};
+// use mockall::{automock};
+
+// #[automock]
+// pub trait PoolMock {
+//     fn create_author(&self) -> Result<Author, Box<dyn Error>>;
+// }
 
 pub async fn create_author(
     author: &AuthorCreate,
@@ -19,7 +25,6 @@ pub async fn create_author(
         id: row.get("id"),
         author_name: row.get("author_name"),
     };
-    println!("{:?}", record);
 
     Ok(record)
 }
@@ -130,4 +135,38 @@ pub async fn delete_author(id: i32, pool: &sqlx::PgPool) -> Result<Author, Box<d
 //         .await?;
 
 //     Ok(authors)
+// }
+
+
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use mockall::predicate::*;
+//     use sqlx::postgres::PgPool;
+
+//     // Generate a mock for the database pool
+//     auto_mock! {
+//         PoolMock;
+//     }
+
+//     // Test function with mock
+//     #[tokio::test]
+//     async fn test_create_author() {
+//         // Create a mock for the database pool
+//         let pool_mock = MockPool::new();
+
+//         // Set up expectations for the mock
+//         pool_mock.expect_get_pool().return_const(&PgPool);
+
+//         let author = AuthorCreate{
+//             author_name: "John Doe".to_string(),
+//         };
+
+//         // Call the CRUD function with the mock
+//         let result = create_author(&author, &pool_mock).await;
+
+//         // Assert that the result is as expected
+//         assert!(result.u.is_ok());
+//     }
 // }
