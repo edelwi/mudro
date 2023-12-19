@@ -56,6 +56,15 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    info!("running db migrations");
+    match sqlx::migrate!("./migrations").run(&pool).await {
+        Ok(_) => (),
+        Err(e) => {
+            error!("Error running migrations: {:?}", e);
+            std::process::exit(2);
+        }
+    };
+
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(AppState { db: pool.clone() }))
