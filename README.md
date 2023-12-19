@@ -1,4 +1,10 @@
-# Mudro - Microservice with quotes from the greats.
+# Mudro: A microservice featuring quotes from renowned figures.
+
+[MIT License](LICENSE.txt)
+
+This Rust microservice was developed as a straightforward solution for managing data related to authors and their quotas. It is implemented in Rust, utilizing sqlx, actix-web, and postgresql.
+
+The primary motivation behind the development of this application was to gain proficiency in the Rust programming language.
 
 ## How to run (in docker)
 
