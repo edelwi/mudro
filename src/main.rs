@@ -43,8 +43,7 @@ async fn main() -> std::io::Result<()> {
         .parse()
         .expect("PORT must be a valid port number");
 
-    let pool = sqlx::postgres::PgPool::connect(url.as_str());
-
+    // let pool = sqlx::postgres::PgPool::connect(url.as_str());
     let pool = match sqlx::postgres::PgPool::connect(url.as_str()).await {
         Ok(pool) => {
             info!("Connection to the database is successful!");

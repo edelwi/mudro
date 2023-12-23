@@ -9,6 +9,7 @@ use crate::models::quote::{
 use crate::AppState;
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use serde_json;
+use log::{error, info, warn};
 
 fn make_quote_short_response(quote: &Quote) -> serde_json::Value {
     let quote_response = serde_json::json!(
@@ -41,20 +42,18 @@ pub async fn new_quote(data: web::Data<AppState>, body: web::Json<QuoteCreate>) 
 
             return HttpResponse::Ok().json(quote_response);
         }
-        Err(error) => {
-            // let specific_error: Option<sqlx::postgres::PgDatabaseError> = error.as_ref()
-            //     .downcast_ref::<sqlx::postgres::PgDatabaseError>()
-            //     .map_or(None, |err| Some(err.clone()));
-
-            // println!(">>>Error. {:?}", specific_error);
-            // if e.contains("Duplicate entry") {
-            //     return HttpResponse::BadRequest().json(
-            //     serde_json::json!({"status": "fail", "message": "Author already exists"}),
-            // );
-            // }
-
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error", "message": format!("{:?}", error)}));
+        Err(e) => {
+            let err_message = format!("{:?}", e);
+            if err_message.contains("Duplicate entry") {
+                warn!("Duplicate entry: {:?}, {}", e, e);
+                return HttpResponse::BadRequest()
+                    .json(serde_json::json!({"status": "error","message": "Quota already exists."}))
+            }
+            else {
+                warn!("Unexpected Error: {:?} {}", e, e);
+                return HttpResponse::Conflict()
+                    .json(serde_json::json!({"status": "error","message": "Something went wrong."}));
+            }
         }
     }
 }
@@ -70,8 +69,16 @@ pub async fn upd_quote(
     let quote_id = match id.parse() {
         Ok(quote_id) => quote_id,
         Err(e) => {
-            return HttpResponse::BadRequest()
-                .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
+            let err_message = format!("{}", e);
+            if err_message.starts_with("invalid digit found") {
+                warn!("Inwalid ID: {} -> {}", e, id);
+                return HttpResponse::BadRequest()
+                .json(serde_json::json!({"status": "error","message": "Wrong ID."}));
+            } else {
+                warn!("Unknown error: {}", e);
+                return HttpResponse::Conflict()
+                    .json(serde_json::json!({"status": "error","message": "Something went wrong."}));
+            }
         }
     };
 
@@ -82,15 +89,23 @@ pub async fn upd_quote(
 
             return HttpResponse::Ok().json(quote_response);
         }
-        Err(error) => {
-            // if e.contains("Duplicate entry") {
-            //     return HttpResponse::BadRequest().json(
-            //     serde_json::json!({"status": "fail", "message": "Quote already exists"}),
-            // );
-            // }
-
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error", "message": format!("{:?}", error)}));
+        Err(e) => {
+            let err_message = format!("{:?}", e);
+            if err_message.contains("RowNotFound") {
+                warn!("Row not found: {:?}, {}", e, e);
+                return HttpResponse::NotAcceptable()
+                    .json(serde_json::json!({"status": "error","message": "ID not exists."}))
+            }
+            else if err_message.contains("Duplicate entry") {
+                warn!("Duplicate entry: {:?}, {}", e, e);
+                return HttpResponse::BadRequest()
+                    .json(serde_json::json!({"status": "error","message": "Quota already exists."}))
+            }
+            else {
+                warn!("Unexpected Error: {:?} {}", e, e);
+                return HttpResponse::Conflict()
+                    .json(serde_json::json!({"status": "error","message": "Something went wrong."}));
+            }
         }
     }
 }
@@ -105,14 +120,18 @@ pub async fn get_random_quote(data: web::Data<AppState>) -> impl Responder {
 
             return HttpResponse::Ok().json(quote_response);
         }
-        // Err(sqlx::Error::RowNotFound) => {
-        //     return HttpResponse::NotFound().json(
-        //     serde_json::json!({"status": "fail","message": format!("Quote with ID: {} not found", quote_id)}),
-        //     );
-        // }
         Err(e) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
+            let err_message = format!("{:?}", e);
+            if err_message.contains("RowNotFound") {
+                warn!("Row not found: {:?}, {}", e, e);
+                return HttpResponse::NotAcceptable()
+                    .json(serde_json::json!({"status": "error","message": "ID not exists."}))
+            }
+            else {
+                warn!("Unexpected Error: {:?} {}", e, e);
+                return HttpResponse::Conflict()
+                    .json(serde_json::json!({"status": "error","message": "Something went wrong."}));
+            }
         }
     };
 }
@@ -124,8 +143,16 @@ pub async fn get_quote(data: web::Data<AppState>, id: web::Path<(String,)>) -> i
     let quote_id = match id.parse() {
         Ok(quote_id) => quote_id,
         Err(e) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
+            let err_message = format!("{}", e);
+            if err_message.starts_with("invalid digit found") {
+                warn!("Inwalid ID: {} -> {}", e, id);
+                return HttpResponse::BadRequest()
+                .json(serde_json::json!({"status": "error","message": "Wrong ID."}));
+            } else {
+                warn!("Unknown error: {}", e);
+                return HttpResponse::Conflict()
+                    .json(serde_json::json!({"status": "error","message": "Something went wrong."}));
+            }
         }
     };
 
@@ -137,14 +164,18 @@ pub async fn get_quote(data: web::Data<AppState>, id: web::Path<(String,)>) -> i
 
             return HttpResponse::Ok().json(quote_response);
         }
-        // Err(sqlx::Error::RowNotFound) => {
-        //     return HttpResponse::NotFound().json(
-        //     serde_json::json!({"status": "fail","message": format!("Quote with ID: {} not found", quote_id)}),
-        //     );
-        // }
         Err(e) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
+            let err_message = format!("{:?}", e);
+            if err_message.contains("RowNotFound") {
+                warn!("Row not found: {:?}, {}", e, e);
+                return HttpResponse::NotAcceptable()
+                    .json(serde_json::json!({"status": "error","message": "ID not exists."}))
+            }
+            else {
+                warn!("Unexpected Error: {:?} {}", e, e);
+                return HttpResponse::Conflict()
+                    .json(serde_json::json!({"status": "error","message": "Something went wrong."}));
+            }
         }
     };
 }
@@ -156,8 +187,16 @@ pub async fn del_quote(data: web::Data<AppState>, id: web::Path<(String,)>) -> i
     let quote_id = match id.parse() {
         Ok(quote_id) => quote_id,
         Err(e) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
+            let err_message = format!("{}", e);
+            if err_message.starts_with("invalid digit found") {
+                warn!("Inwalid ID: {} -> {}", e, id);
+                return HttpResponse::BadRequest()
+                .json(serde_json::json!({"status": "error","message": "Wrong ID."}));
+            } else {
+                warn!("Unknown error: {}", e);
+                return HttpResponse::Conflict()
+                    .json(serde_json::json!({"status": "error","message": "Something went wrong."}));
+            }
         }
     };
 
@@ -169,14 +208,18 @@ pub async fn del_quote(data: web::Data<AppState>, id: web::Path<(String,)>) -> i
 
             return HttpResponse::Ok().json(quote_response);
         }
-        // Err(sqlx::Error::RowNotFound) => {
-        //     return HttpResponse::NotFound().json(
-        //     serde_json::json!({"status": "fail","message": format!("Quote with ID: {} not found", quote_id)}),
-        //     );
-        // }
         Err(e) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
+            let err_message = format!("{:?}", e);
+            if err_message.contains("RowNotFound") {
+                warn!("Row not found: {:?}, {}", e, e);
+                return HttpResponse::NotAcceptable()
+                    .json(serde_json::json!({"status": "error","message": "ID not exists."}))
+            }
+            else {
+                warn!("Unexpected Error: {:?} {}", e, e);
+                return HttpResponse::Conflict()
+                    .json(serde_json::json!({"status": "error","message": "Something went wrong."}));
+            }
         }
     };
 }
@@ -218,14 +261,18 @@ pub async fn get_quotes(
 
             return HttpResponse::Ok().json(quotes_response);
         }
-        // Err(sqlx::Error::RowNotFound) => {
-        //     return HttpResponse::NotFound().json(
-        //     serde_json::json!({"status": "fail","message": format!("Quote with ID: {} not found", quote_id)}),
-        //     );
-        // }
         Err(e) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
+            let err_message = format!("{:?}", e);
+            if err_message.contains("RowNotFound") {
+                warn!("Row not found: {:?}, {}", e, e);
+                return HttpResponse::NotAcceptable()
+                    .json(serde_json::json!({"status": "error","message": "ID not exists."}))
+            }
+            else {
+                warn!("Unexpected Error: {:?} {}", e, e);
+                return HttpResponse::Conflict()
+                    .json(serde_json::json!({"status": "error","message": "Something went wrong."}));
+            }
         }
     };
 }
