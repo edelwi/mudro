@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mudlo-config
+data:
+  postgres-url: pg-service
+  db-name: mudroslov

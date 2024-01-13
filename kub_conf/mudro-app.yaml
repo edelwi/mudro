@@ -1,0 +1,52 @@
+!!! TODO - it's a draft, finish it
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mudro-deployment
+  labels:
+    app: mudro
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mudro
+  template:
+    metadata:
+      labels:
+        app: mudro
+    spec:
+      containers:
+      - name: mudro
+        image: edelwi/mudro:1.0.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: pg-secret
+              key: postgres-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pg-secret
+              key: postgres-password
+        - name:
+          valueFrom:
+            configMapKeyRef:
+              name: mudlo-config
+              key: db-name
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mudro-service
+spec:
+  type: NodePort
+  selector:
+    app: mudro
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 31000
