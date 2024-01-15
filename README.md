@@ -210,3 +210,14 @@ Delete quote by id:
 DELETE http://localhost:1339/api/quotes/41
 
 response like in previous item.
+
+
+## How to run (in kubernetis)
+
+> **_NOTE:_** Draft (without nginx), tested in minkube only with port forwarding 8080:8080.
+
+```shell
+cd kub_conf/conf1/
+kubectl apply -f .
+```
+Set port forwarding 8080:8080 fnd enjoy: http://localhost:8080/api/quotes/random

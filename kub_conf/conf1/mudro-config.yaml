@@ -1,7 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mudlo-config
+  name: mudro-config
 data:
   postgres-url: pg-service
   db-name: mudroslov
+  bind-host: "0.0.0.0"
+  bind-port: "8080"

@@ -1,4 +1,3 @@
-!!! TODO - it's a draft, finish it
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,11 +30,23 @@ spec:
             secretKeyRef:
               name: pg-secret
               key: postgres-password
-        - name:
+        - name: DB_NAME
           valueFrom:
             configMapKeyRef:
-              name: mudlo-config
+              name: mudro-config
               key: db-name
+        - name: DATABASE_URL
+          value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_SERVICE_SERVICE_HOST)/$(DB_NAME)
+        - name: HOST
+          valueFrom:
+            configMapKeyRef:
+              name: mudro-config
+              key: bind-host
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: mudro-config
+              key: bind-port
 ---
 apiVersion: v1
 kind: Service

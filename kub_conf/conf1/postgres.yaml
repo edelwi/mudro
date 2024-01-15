@@ -30,11 +30,18 @@ spec:
             secretKeyRef:
               name: pg-secret
               key: postgres-password
-        - name:
+        - name: POSTGRES_DB
           valueFrom:
             configMapKeyRef:
-              name: mudlo-config
+              name: mudro-config
               key: db-name
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: mudro-pg-pv-claim
+      volumes:
+      - name: mudro-pg-pv-claim
+        persistentVolumeClaim:
+          claimName: mudro-pg-pv-claim
 ---
 apiVersion: v1
 kind: Service
